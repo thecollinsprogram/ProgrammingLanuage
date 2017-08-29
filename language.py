@@ -1,12 +1,7 @@
 from lexer import *
+from parser import *
 
-KEYWORDS = []
-SYMBOLS = ["==", "!=", "<=", ">=", "+=", "-=", "*=", "/=", "%=", "^=", "+", "-", "*", "/", "^", "%", "=", "!", "<", ">", ",", ".", "(", ")", "[", "]"]
-
-file = open("example.txt")
-text = file.read()
-file.close()
-tokens = lex(text, KEYWORDS, SYMBOLS)
-
-for token in tokens:
-	print(token.name + " : " + token.value)
+text = input("==> ")
+lexer = Lexer(text)
+parser = Parser(lexer)
+print(parser.expr())
