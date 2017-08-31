@@ -1,3 +1,5 @@
+from ast import *
+
 class Parser:
 	
 	def __init__(self, lexer):
@@ -12,43 +14,65 @@ class Parser:
 			self.token = self.lexer.getNext()
 		else:
 			self.error()
+			
+	def advance(self):
+		self.token = self.lexer.getNext()
 		
 	def factor(self):
-		if self.token.type == "INT":
-			value = self.token.value
-			self.eat("INT")
-			return value
+		token = self.token
+		
+		if token.type == "+" or token.type == "-":
+			self.advance()
+			node = UnaryOp(token, self.factor())
+			return node
+		
+		elif token.type == "INT":
+			self.advance()
+			num = Num(token)
+			return num
 			
-		elif self.token.type == "(":
+		elif token.type == "(":
 			self.eat("(")
 			result = self.expr()
 			self.eat(")")
 			return result
 			
 		else:
-			self.error()
+			node = self.var()
+			return node
 	
 	def term(self):
-		result = self.factor()
+		node = self.factor()
 		while self.token.type in ("*", "/"):
-			if self.token.type == "*":
-				self.eat("*")
-				result = result * self.factor()
-			elif self.token.type == "/":
-				self.eat("/")
-				result = result / self.factor()
+			token = self.token
+			self.advance()
+			node = BinOp(node, token, self.factor())
 				
-		return result
-				
+		return node
 		
 	def expr(self):
-		result = self.term()
+		node = self.term()
 		while self.token.type in ("+", "-"):
-			if self.token.type == "+":
-				self.eat("+")
-				result = result + self.term()
-			elif self.token.type == "-":
-				self.eat("-")
-				result = result - self.term()
+			token = self.token
+			self.advance()
+			node = BinOp(node, token, self.term())
 				
-		return result
+		return node
+		
+	def var(self):
+		node = Var(self.token)
+		self.eat("IDEN")
+		return node
+		
+	def program(self):
+		program = Program()
+		while not self.lexer.eof:
+			statement = self.statement()
+			program.children.append(statement)
+		return program
+			
+	def statement(self):
+		var = self.var()
+		self.eat("=")
+		expr = self.expr()
+		return Statement(var, expr)
