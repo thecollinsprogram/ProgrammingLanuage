@@ -1,0 +1,7 @@
+factor : ("+" | "-" factor) | (INT) | "(" expr ")" | var
+term : factor ("*" | "/" factor)*
+expr : term ("+" | "-" factor)*
+
+program : statment*
+statment : var "=" expr
+var : IDEN
