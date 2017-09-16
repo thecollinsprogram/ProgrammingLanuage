@@ -1,41 +1,48 @@
 from token import *
 
-SYMBOLS = ["+", "-", "*", "/", "(", ")", "="]
-KEYWORDS = ["var"]
+SYMBOLS = ["+", "-", "*", "/", "(", ")", "=", ":", ">", "<", "!", "{", "}"]
+KEYWORDS = ["if", "else", "while", "print"]
 
 class Lexer:
 	
 	def __init__(self, text):
 		self.text = text
-		self.pos = 0
+		self.index = 0
 		self.char = self.text[0]
-		self.eof = False
-		
+		self.line = 1
+
 	def error(self):
-		raise Exception("Invalid character: " + self.char)
+		raise Exception("Invalid character '" + self.char + "' on line " + str(self.line))
 		
 	def getNext(self):
 		self.stripWhitespace()
 		
 		token = self.getNextNumber()
 		if token:
+			# print(token)
 			return token
 			
 		token = self.getNextSymbol()
 		if token:
+			# print(token)
 			return token
 			
 		token = self.getNextIdentifier()
 		if token:
+			# print(token)
 			return token
-			
-		if self.eof:
+
+		if self.eof():
 			return Token("EOF", "EOF")
 			
 		self.error()
 			
 	def stripWhitespace(self):
-		while self.char == " " or self.char == "\n":
+		while self.char == " " or self.char == "\n" or self.char == "\t":
+			if self.eof():
+				break
+			if self.char == "\n":
+				self.line += 1
 			self.advance()
 	
 	def getNextNumber(self):
@@ -43,7 +50,7 @@ class Lexer:
 			number = self.char
 			self.advance()
 			
-			while not self.eof and self.char.isdigit():
+			while not self.eof() and self.char.isdigit():
 				number += self.char
 				self.advance()
 		
@@ -63,7 +70,7 @@ class Lexer:
 			identifier = self.char
 			self.advance()
 			
-			while not self.eof and self.char.isalpha() or self.char == "_" or self.char.isdigit():
+			while not self.eof() and self.char.isalpha() or self.char == "_" or self.char.isdigit():
 				identifier += self.char
 				self.advance()
 			
@@ -78,8 +85,9 @@ class Lexer:
 			return False
 	
 	def advance(self):
-		self.pos += 1
-		if self.pos < len(self.text):
-			self.char = self.text[self.pos]
-		else:
-			self.eof = True
+		self.index += 1
+		if not self.eof():
+			self.char = self.text[self.index]
+
+	def eof(self):
+		return self.index >= len(self.text)

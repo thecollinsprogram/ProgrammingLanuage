@@ -1,2 +1,5 @@
 .zedstate
 __pycache__
+.vscode/tags
+.vscode/settings.json
+*.pyc

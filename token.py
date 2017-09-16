@@ -9,7 +9,3 @@ class Token:
 		
 	def __rep__(self):
 		return self.__str__()
-		
-	def run(self):
-		print("test")
-		return self.value
